@@ -92,3 +92,52 @@ begin
 		o <= not x nand not y;
 	end process;
 end rtl;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity xor_chip is
+
+	port
+	(
+		x	: in std_logic;
+		y	: in std_logic;
+		o	: out std_logic
+	);
+
+end entity;
+
+architecture rtl of xor_chip is
+begin
+
+	process (x, y)
+	begin
+		o <= (not (x and y)) and (x or y);
+	end process;
+end rtl;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity mux_chip is
+
+	port
+	(
+		x	: in std_logic;
+		y	: in std_logic;
+		sel	: in std_logic;
+		o	: out std_logic
+	);
+
+end entity;
+
+architecture rtl of mux_chip is
+begin
+
+	process (sel)
+	begin
+		o <= (x and sel) or (y and sel);
+	end process;
+end rtl;

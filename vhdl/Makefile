@@ -4,7 +4,7 @@ GHDLFLAGS=--ieee=synopsys
 GHDLRUNFLAGS=
 
 CHIPS_1INPUT=not
-CHIPS_2INPUTS=nand and or
+CHIPS_2INPUTS=nand and or xor
 
 ALL_CHIPS=$(CHIPS_1INPUT) $(CHIPS_2INPUTS)
 
