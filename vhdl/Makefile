@@ -12,11 +12,13 @@ CHIPSENTITIES_NAMES=$(addsuffix _chip,$(ALL_CHIPS))
 TESTENTITIES_NAMES=$(addprefix tb_, $(addsuffix _chip,$(ALL_CHIPS)))
 TESTBENCHS_NAMES=$(addprefix tb_, $(addsuffix _chip-test,$(ALL_CHIPS)))
 
-TESTBENCHS_1_1_SRCS=$(addprefix tests/tb_, $(addsuffix _chip.vhd,$(CHIPS_1INPUT)))
-TESTBENCHS_2_1_SRCS=$(addprefix tests/tb_, $(addsuffix _chip.vhd,$(CHIPS_2INPUTS)))
+TESTBENCHS_1_1_SRCS=$(addprefix tests/generated/tb_, $(addsuffix _chip.vhd,$(CHIPS_1INPUT)))
+TESTBENCHS_2_1_SRCS=$(addprefix tests/generated/tb_, $(addsuffix _chip.vhd,$(CHIPS_2INPUTS)))
 
 TEST_TEMPLATE_1_1=tests/testbench_1-1_template.vhd
 TEST_TEMPLATE_2_1=tests/testbench_2-1_template.vhd
+
+GENERATED_TESTS_DIR=tests/generated/
 
 OBJ_FILE=work-obj93.cf
 
@@ -25,16 +27,19 @@ all: $(OBJ_FILE)
 
 tests: run
 
-$(TESTBENCHS_1_1_SRCS):
-	cat $(TEST_TEMPLATE_1_1) | sed 's\@@CHIPUNIT@@\$(subst .vhd,,$(subst tests/tb_,,$@))\g' > $@
+$(GENERATED_TESTS_DIR):
+	mkdir -p $(GENERATED_TESTS_DIR)
 
-$(TESTBENCHS_2_1_SRCS):
-	cat $(TEST_TEMPLATE_2_1) | sed 's\@@CHIPUNIT@@\$(subst .vhd,,$(subst tests/tb_,,$@))\g' > $@
+$(TESTBENCHS_1_1_SRCS): $(GENERATED_TESTS_DIR)
+	cat $(TEST_TEMPLATE_1_1) | sed 's\@@CHIPUNIT@@\$(subst .vhd,,$(subst tests/generated/tb_,,$@))\g' > $@
+
+$(TESTBENCHS_2_1_SRCS): $(GENERATED_TESTS_DIR)
+	cat $(TEST_TEMPLATE_2_1) | sed 's\@@CHIPUNIT@@\$(subst .vhd,,$(subst tests/generated/tb_,,$@))\g' > $@
 
 generate: $(OBJ_FILE)
 
 $(TESTENTITIES_NAMES): $(TESTBENCHS_1_1_SRCS) $(TESTBENCHS_2_1_SRCS)
-	$(GHDL) -a $(GHDLFLAGS) $(addprefix tests/, $(addsuffix .vhd,$@))
+	$(GHDL) -a $(GHDLFLAGS) $(addprefix tests/generated/, $(addsuffix .vhd,$@))
 	$(GHDL) -c $(GHDLFLAGS) -e $@
 
 $(CHIPSENTITIES_NAMES):
@@ -53,6 +58,6 @@ run : $(OBJ_FILE)
 	make $(TESTBENCHS_NAMES)
 
 clean:
-	rm -Rf $(OBJ_FILE) $(TESTBENCHS_1_1_SRCS) $(TESTBENCHS_2_1_SRCS)
+	rm -Rf $(OBJ_FILE) $(TESTBENCHS_1_1_SRCS) $(TESTBENCHS_2_1_SRCS) $(GENERATED_TESTS_DIR)
 
 .PHONY: clean analyze generate run tests all $(TESTENTITIES_NAMES) $(TESTBENCHS_NAMES) $(CHIPSENTITIES_NAMES)
