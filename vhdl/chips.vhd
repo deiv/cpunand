@@ -141,3 +141,29 @@ begin
 		o <= (x and not sel) or (y and sel);
 	end process;
 end rtl;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity dmux_chip is
+
+	port
+	(
+		data : in std_logic;
+		sel	 : in std_logic;
+		x	 : out std_logic;
+		y	 : out std_logic
+	);
+
+end entity;
+
+architecture rtl of dmux_chip is
+begin
+
+	process (data, sel)
+	begin
+		x <= data and not sel;
+		y <= data and sel;
+	end process;
+end rtl;
