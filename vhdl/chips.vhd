@@ -136,8 +136,8 @@ end entity;
 architecture rtl of mux_chip is
 begin
 
-	process (sel)
+	process (x, y, sel)
 	begin
-		o <= (x and sel) or (y and sel);
+		o <= (x and not sel) or (y and sel);
 	end process;
 end rtl;
