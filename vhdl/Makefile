@@ -9,7 +9,7 @@ CHIPS_3_1=mux
 CHIPS_2_2=dmux
 
 BASIC_CHIPS=$(CHIPS_1INPUT) $(CHIPS_2INPUTS) $(CHIPS_3_1) $(CHIPS_2_2)
-ALU_CHIPS=half_adder full_adder
+ALU_CHIPS=half_adder full_adder alu
 
 BASIC_CHIPSENTITIES_NAMES=$(addsuffix _chip,$(BASIC_CHIPS))
 BASIC_TESTENTITIES_NAMES=$(addprefix tb_, $(addsuffix _chip,$(BASIC_CHIPS)))
@@ -27,9 +27,9 @@ TEST_TEMPLATE_2_1=tests/testbench_2-1_template.vhd
 TEST_TEMPLATE_3_1=tests/testbench_3-1_template.vhd
 TEST_TEMPLATE_2_2=tests/testbench_2-2_template.vhd
 
-ALU_CHIPSENTITIES_NAME=half_adder full_adder
+ALU_CHIPSENTITIES_NAME=half_adder full_adder alu
 ALU_TESTBENCHS_SRCS=tests/testbench_alu.vhd
-ALU_TESTENTITIES_NAMES=tb_half_adder_chip tb_full_adder_chip
+ALU_TESTENTITIES_NAMES=tb_half_adder_chip tb_full_adder_chip tb_alu_chip
 
 GENERATED_TESTS_DIR=tests/generated/
 
@@ -66,7 +66,7 @@ $(BASIC_CHIPSENTITIES_NAMES):
 	$(GHDL) -c $(GHDLFLAGS) -e $@
 
 $(ALU_CHIPSENTITIES_NAME):
-	$(GHDL) -a $(GHDLFLAGS) alu.vhdl
+	$(GHDL) -a $(GHDLFLAGS) alu.vhd
 	$(GHDL) -c $(GHDLFLAGS) -e $@
 
 $(ALU_TESTENTITIES_NAMES):
