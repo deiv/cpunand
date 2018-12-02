@@ -10,11 +10,13 @@ CHIPS_2_2=dmux
 
 BASIC_CHIPS=$(CHIPS_1INPUT) $(CHIPS_2INPUTS) $(CHIPS_3_1) $(CHIPS_2_2)
 ALU_CHIPS=half_adder full_adder alu
+MEM_CHIPS=Single_port_RAM_VHDL
+#DFF
 
 BASIC_CHIPSENTITIES_NAMES=$(addsuffix _chip,$(BASIC_CHIPS))
 BASIC_TESTENTITIES_NAMES=$(addprefix tb_, $(addsuffix _chip,$(BASIC_CHIPS)))
 
-ALL_CHIPS=$(BASIC_CHIPS) $(ALU_CHIPS)
+ALL_CHIPS=$(BASIC_CHIPS) $(ALU_CHIPS) $(MEM_CHIPS)
 TESTBENCHS_NAMES=$(addprefix tb_, $(addsuffix _chip-test,$(ALL_CHIPS)))
 
 TESTBENCHS_1_1_SRCS=$(addprefix tests/generated/tb_, $(addsuffix _chip.vhd,$(CHIPS_1INPUT)))
@@ -30,6 +32,11 @@ TEST_TEMPLATE_2_2=tests/testbench_2-2_template.vhd
 ALU_CHIPSENTITIES_NAME=half_adder full_adder alu
 ALU_TESTBENCHS_SRCS=tests/testbench_alu.vhd
 ALU_TESTENTITIES_NAMES=tb_half_adder_chip tb_full_adder_chip tb_alu_chip
+
+MEM_CHIPSENTITIES_NAME=DFF Single_port_RAM_VHDL
+MEM_TESTBENCHS_SRCS=tests/testbench_mem.vhd
+MEM_TESTENTITIES_NAMES= tb_single_port_ram_vhdl_chip
+#tb_DFF_chip
 
 GENERATED_TESTS_DIR=tests/generated/
 
@@ -73,13 +80,21 @@ $(ALU_TESTENTITIES_NAMES):
 	$(GHDL) -a $(GHDLFLAGS) $(ALU_TESTBENCHS_SRCS)
 	$(GHDL) -c $(GHDLFLAGS) -e $@
 
-analyze:  $(BASIC_CHIPSENTITIES_NAMES) $(BASIC_TESTENTITIES_NAMES) $(ALU_CHIPSENTITIES_NAME) $(ALU_TESTENTITIES_NAMES)
+$(MEM_CHIPSENTITIES_NAME):
+	$(GHDL) -a $(GHDLFLAGS) memory.vhd
+	$(GHDL) -c $(GHDLFLAGS) -e $@
+
+$(MEM_TESTENTITIES_NAMES):
+	$(GHDL) -a $(GHDLFLAGS) $(MEM_TESTBENCHS_SRCS)
+	$(GHDL) -c $(GHDLFLAGS) -e $@
+
+analyze:  $(BASIC_CHIPSENTITIES_NAMES) $(BASIC_TESTENTITIES_NAMES) $(ALU_CHIPSENTITIES_NAME) $(ALU_TESTENTITIES_NAMES) $(MEM_CHIPSENTITIES_NAME) $(MEM_TESTENTITIES_NAMES) $(ALU_TESTBENCHS_SRCS) $(MEM_TESTBENCHS_SRCS)
 
 $(TESTBENCHS_NAMES): $(OBJ_FILE)
 	mkdir -p tests/waveforms
 	$(GHDL) -c $(GHDLFLAGS) -r $(subst -test,,$@) $(GHDLRUNFLAGS) --vcd=tests/waveforms/$@.vcd
 
-$(OBJ_FILE):  chips.vhd $(TESTBENCHS_1_1_SRCS) $(TESTBENCHS_2_1_SRCS) $(TESTBENCHS_3_1_SRCS) $(TESTBENCHS_2_2_SRCS) $(TESTBENCHS_SRCS)
+$(OBJ_FILE):  chips.vhd alu.vhd memory.vhd $(TESTBENCHS_1_1_SRCS) $(TESTBENCHS_2_1_SRCS) $(TESTBENCHS_3_1_SRCS) $(TESTBENCHS_2_2_SRCS) $(TESTBENCHS_SRCS)
 	make analyze
 
 run : $(OBJ_FILE)
